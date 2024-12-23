@@ -1,0 +1,108 @@
+matrix = [[1, 2, 3],
+          [4, 5, 6]]
+transposed = [[matrix[row][col] for row in range(len(matrix))] for col in range(len(matrix[0]))]
+print('transposed', transposed) # transposed
+
+flatterned = [matrix[row][col] for col in range(len(matrix[0])) for row in range(len(matrix))]
+print('flatterned', flatterned) # transposed
+
+
+def find_positions(board):
+    positions = []
+    rows, cols = len(board), len(board[0])
+
+    for i in range(rows):
+        for j in range(cols):
+            if board[i][j] == 'E':
+                if ((i > 0 and board[i-1][j] == 'E') or
+                (i < rows - 1 and board[i+1][j] == 'E') or
+                (j > 0 and board[i][j-1] == 'E') or
+                (j < cols - 1 and board[i][j+1] == 'E')):
+                    positions.append((i, j))
+    return positions
+
+def path_traverse(grid, start_row, start_col):
+    # Get the number of rows and columns in the grid
+    rows, columns = len(grid), len(grid[0])
+
+    # Check the validity of the input
+    if start_row < 0 or start_row >= rows or start_col < 0 or start_col >= columns:
+        return "Invalid input"
+
+    # Define all four possible directions of movement
+    directions = [(1, 0), (-1, 0), (0, -1), (0, 1)]
+
+    # Start with the value at the starting cell
+    visited = [grid[start_row][start_col]]
+
+    # Start an infinite loop until we break it when there are no more moves
+    while True:
+        # Initialize a current maximum as negative one
+        curr_max = -1
+
+        # Look at each adjacent cell in all the directions
+        for dir in directions:
+            # Calculate the new cell's row and column indices
+            new_row = start_row + dir[0]
+            new_col = start_col + dir[1]
+
+            # If the new cell is out of the grid boundary, ignore it
+            if new_row < 0 or new_row >= rows or new_col < 0 or new_col >= columns:
+                continue
+
+            # If the value of the new cell is greater than the current maximum
+            if grid[new_row][new_col] > curr_max:
+                # Save it as the next cell to go to
+                next_row, next_col, curr_max = new_row, new_col, grid[new_row][new_col]
+
+        # If we don't have any valid cell we can go to, break from the loop
+        if curr_max <= grid[start_row][start_col]:
+            break
+
+        # Otherwise, go to the next cell
+        start_row, start_col = next_row, next_col
+
+        # Append the value of the next cell to the result list
+        visited.append(curr_max)
+
+    # Return the list of visited cells' values
+    return visited
+
+board = [
+ ['P', 'E', 'E', 'P'],
+ ['E', 'P', 'E', 'P'],
+ ['P', 'E', 'P', 'P'],
+ ['P', 'E', 'P', 'E']
+]
+
+print(find_positions(board))
+
+# Prints [(0, 1), (0, 2), (1, 2), (2, 1), (3, 1)]
+
+def trek_path(elevation_map, start_x, start_y):
+    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]  # East, South, West, North
+    path = [elevation_map[start_x][start_y]]
+
+    while True:
+        current_height = path[-1]
+        # Pre-completed: Find all possible moves from the current position, moving only to higher and not yet visited elevations.
+        possible_moves = [
+            (start_x + dx, start_y + dy) for dx, dy in directions
+            if (0 <= start_x + dx < len(elevation_map) and
+                0 <= start_y + dy < len(elevation_map[0]) and
+                elevation_map[start_x + dx][start_y + dy] > current_height)
+        ]
+        if not possible_moves:
+            break
+        max_item = max([item for item in possible_moves], key=lambda item: elevation_map[item[0]][item[1]])
+        start_x, start_y = max_item
+        path.append(elevation_map[max_item[0]][max_item[1]])
+        # TODO: Implement logic to select the next position based on the highest elevation in the possible moves.
+        # Hint: Use a key function with the max() function to find the move leading to the highest elevation.
+    return path
+mountain = [
+    [1, 2, 3],
+    [2, 3, 4],
+    [3, 5, 6]
+]
+print(trek_path(mountain, 1, 1))
